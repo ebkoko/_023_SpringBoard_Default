@@ -5,8 +5,17 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<!-- <script src="js/jquery-3.6.0.min.js"></script> 이렇게 헤드에 작성하면 모든 페이지에 적용 가능 -->
 </head>
 <body>
-
+	<jsp:include page="./header.jsp"></jsp:include>
+	
+	<div style="text-align: center;">
+		<h1>게시판 홈</h1>
+		<p>회원가입, 로그인, 게시판, 파일업로드 등을</p>
+		<p>구현할 예정</p>
+	</div>
+	
+	<jsp:include page="./footer.jsp"></jsp:include>
 </body>
 </html>

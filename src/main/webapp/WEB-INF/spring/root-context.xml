@@ -16,6 +16,7 @@
 	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
 		<property name="url" value="jdbc:mysql://localhost:3306/studydb?serverTimezone=UTC"></property>
+		<!-- <property name="url" value="jdbc:mysql://172.16.46.1:3306/studydb?serverTimezone=UTC"></property> -->
 		<property name="username" value="study"></property>
 		<property name="password" value="!ezen1234"></property>
 		
@@ -33,14 +34,14 @@
 	</bean>
 	
 	<!-- Mybatis 설정 -->
-	<!-- <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"></property>
 		<property name="configLocation" value="classpath:sql-map-config.xml"></property>
-	</bean> -->
+	</bean>
 	
-	<!-- <bean class="org.mybatis.spring.SqlSessionTemplate">
+	<bean class="org.mybatis.spring.SqlSessionTemplate">
 		<constructor-arg ref="sessionFactory"></constructor-arg>
-	</bean> -->
+	</bean>
 	
 	<!-- Transaction 설정 -->
 	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
