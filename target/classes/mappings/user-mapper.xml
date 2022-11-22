@@ -10,4 +10,38 @@
 			FROM T_USER
 			WHERE USER_ID = #{userId}
 	</select>
+	
+	<insert id="join" parameterType="user">
+	<!-- <![CDATA[]]> -> 등호 < 를 꺽쇠로 인식되지 않게 함 -->  
+	<![CDATA[
+		INSERT INTO T_USER(
+			USER_ID,
+			USER_PW,
+			USER_NM,
+			USER_MAIL,
+			USER_TEL,
+			USER_REGDATE
+		) VALUES (
+			#{userId},
+			#{userPw},
+			#{userNm},
+			#{userMail},
+			#{userTel},
+			NOW()
+		)
+	]]>
+	</insert>
+	
+	<select id="login" parameterType="user" resultType="user">
+	<![CDATA[
+		SELECT USER_ID,
+				USER_NM,
+				USER_MAIL,
+				USER_TEL,
+				USER_ROLE
+			FROM T_USER
+			WHERE USER_ID = #{userId}
+				AND USER_PW = #{userPw}
+	]]>
+	</select>
 </mapper>

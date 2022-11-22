@@ -1,10 +1,10 @@
 package com.ezen.springboard.controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.ezen.springboard.service.user.UserService;
 import com.ezen.springboard.vo.UserVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping("/user")
@@ -29,9 +28,18 @@ public class UserController {
 	}
 	
 	// post 방식은 해당 로직 처리
-	@PostMapping("/join.do")
-	public void join(UserVO userVO) {
+	// 회원가입 진행
+	@PostMapping(value="/join.do", produces="application/text; charset=UTF-8;")
+	public String join(UserVO userVO, Model model) {
+		int joinResult = userService.join(userVO);
 		
+		if(joinResult == 0) {
+			model.addAttribute("joinMsg", "회원가입에 실패하였습니다. 관리자에게 문의해주세요.");
+			return "user/join";
+		}
+		
+		model.addAttribute("joinMsg", "회원가입에 성공하였습니다. 로그인해주세요.");		
+		return "user/login";
 	}
 	
 //	@PostMapping(value="/test.do", produces="application/test; charset=UTF-8;")
@@ -71,21 +79,21 @@ public class UserController {
 	@PostMapping("/idCheck.do")
 	@ResponseBody
 	public String idCheck(UserVO userVO) throws JsonProcessingException {
-		/*ObjectMapper mapper = new ObjectMapper();
-		
-		Map<String, String> resultMap = new HashMap<String, String>();
-		
-		int idCnt = userService.idCheck(userVO.getUserId());
-		
-		if(idCnt > 0) {
-			resultMap.put("msg", "duplicatedId");
-		} else {
-			resultMap.put("msg", "idOk");
-		}
-		
-		String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultMap);
-		
-		return json;*/
+//		ObjectMapper mapper = new ObjectMapper();
+//		
+//		Map<String, String> resultMap = new HashMap<String, String>();
+//		
+//		int idCnt = userService.idCheck(userVO.getUserId());
+//		
+//		if(idCnt > 0) {
+//			resultMap.put("msg", "duplicatedId");
+//		} else {
+//			resultMap.put("msg", "idOk");
+//		}
+//		
+//		String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultMap);
+//		
+//		return json;
 		// 간단한 데이터를 리턴하는 ajax 메소드에서는 굳이 json형태로 만들어서 리턴할 필요가 없다.
 		String returnStr = "";
 		
@@ -97,5 +105,52 @@ public class UserController {
 	         returnStr = "idOk";
 	      }
 	      return returnStr;
+	}
+	
+//	@RequestMapping("login.do")
+//	public String login(UserVO userVO) {
+//		// 화면으로 이동
+//		if(userVO.getUserId() == null)
+//			return "user/login";
+//		// 로직 처리
+//	}
+	
+	// 로그인 화면으로 이동
+	@GetMapping("/login.do")
+	public String loginView() {
+		return "user/login";
+	}
+	
+	// 로그인 처리
+	@PostMapping("/login.do")
+	@ResponseBody // ajax로 작성했을 때 사용
+	// HttpSession: 현재 WAS에 접속한 유저의 세션정보를 담고있는 객체
+	// 				세션에서 사용할 데이터를 담아줄 수 있다.
+	public String login(UserVO userVO, HttpSession session) {
+		// 1. 아이디 체크
+		int idCheck = userService.idCheck(userVO.getUserId());
+		
+		if(idCheck < 1) {
+			return "idFail";
+		} else {
+			UserVO loginUser = userService.login(userVO);
+			
+			// 2. 비밀번호 체크(비밀번호가 틀리면 null)
+			if(loginUser == null) {
+				return "pwFail";
+			}
+			
+			// 3. 로그인 성공
+			// 세션에 로그인한 유저의 정보를 담아서 관리
+			session.setAttribute("loginUser", loginUser);
+			return "loginSuccess";
+		}
+		
+	}
+	
+	@GetMapping("/logout.do")
+	public String logout(HttpSession session) {
+		session.invalidate();
+		return "redirect:/index.jsp";
 	}
 }
