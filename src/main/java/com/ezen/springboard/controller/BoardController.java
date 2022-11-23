@@ -1,11 +1,20 @@
 package com.ezen.springboard.controller;
 
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ezen.springboard.service.board.BoardService;
+import com.ezen.springboard.vo.BoardVO;
+import com.ezen.springboard.vo.UserVO;
 
 @Controller
 @RequestMapping("/board")
@@ -28,22 +37,80 @@ public class BoardController {
 //	}
 	
 	// 게시글 목록 화면으로 이동
-	@GetMapping("/getBoardList.do")
-	public String getBoardListView() {
+	@RequestMapping("/getBoardList.do")
+	public String getBoardList(Model model) {
+		List<BoardVO> boardList = boardService.getBoardList();
+		
+		model.addAttribute("boardList", boardList);
+		
 		return "board/getBoardList";
 	}
 	
-	// 게시글 목록 가져오는 로직 처리
-	
-	
-	
-	
-	
-	
+	// 게시글 목록 가져오는 로직 처리(Ajax)
+//	@PostMapping(value="/getBoardList.do", produces="application/text; charset=UTF-8;")
+//	@ResponseBody
+//	public String getBoardList() throws JsonProcessingException {
+//		ObjectMapper mapper = new ObjectMapper();
+//		
+//		Map<String, Object> returnMap = new HashMap<String, Object>();
+//		
+//		List<BoardVO> boardList = boardService.getBoardList();
+//		
+//		returnMap.put("boardList", boardList);
+//		
+//		String jsonStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(returnMap);
+//		
+//		return jsonStr;
+//	}	
 	
 	// 게시글 등록 화면으로 이동
 	@GetMapping("insertBoard.do")
-	public String insertBoardView() {
+	public String insertBoardView(HttpSession session) {
+		UserVO loginUser = (UserVO)session.getAttribute("loginUser");
+		
+		if(loginUser == null) {
+			return "redirect:/user/login.do";
+		}
+		
 		return "board/insertBoard";
 	}
+	
+	// 게시글 등록
+	@PostMapping("/insertBoard.do")
+	public String insertBoard(BoardVO boardVO) {
+		boardService.insertBoard(boardVO);
+		
+		// 등록 후 게시글 목록으로 이동
+		return "redirect:/board/getBoardList.do";
+	}
+	
+	// 게시글 상세 조회
+	@RequestMapping("/getBoard.do")
+	public String getBoard(@RequestParam("boardNo") int boardNo, Model model) {
+		// 조회수 증가
+		//boardService.updateBoardCnt(boardNo);
+		
+		BoardVO board = boardService.getBoard(boardNo);
+		
+		model.addAttribute("board", board);
+		
+		return "board/getBoard";
+	}
+	
+	// 조회수 증가(새로고침할 때 조회수 고정)
+	@RequestMapping("/updateBoardCnt.do")
+	public String updateBoardCnt(@RequestParam("boardNo") int boardNo) {
+		boardService.updateBoardCnt(boardNo);
+		
+		return "redirect:/board/getBoard.do?boardNo=" + boardNo;
+	}
+	
+	// 게시글 수정
+	@PostMapping("/updateBoard.do")
+	public String updateBoard(BoardVO boardVO) {
+		boardService.updateBoard(boardVO);
+		
+		return "redirect:/board/getBoardList.do?boardNo=" + boardVO.getBoardNo();
+	}
+	
 }
