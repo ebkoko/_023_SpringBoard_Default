@@ -1,6 +1,7 @@
 package com.ezen.springboard.service.board.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,8 @@ public class BoardServiceImpl implements BoardService {
 	}
 	
 	@Override
-	public List<BoardVO> getBoardList() {
-		return boardDAO.getBoardList();
+	public List<BoardVO> getBoardList(Map<String, String> paramMap) {
+		return boardDAO.getBoardList(paramMap);
 	}
 	
 	@Override
@@ -36,5 +37,10 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public void updateBoard(BoardVO boardVO) {
 		boardDAO.updateBoard(boardVO);
+	}
+	
+	@Override
+	public void deleteBoard(int boardNo) {
+		boardDAO.deleteBoard(boardNo);
 	}
 }

@@ -1,6 +1,7 @@
 package com.ezen.springboard.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -38,10 +39,16 @@ public class BoardController {
 	
 	// 게시글 목록 화면으로 이동
 	@RequestMapping("/getBoardList.do")
-	public String getBoardList(Model model) {
-		List<BoardVO> boardList = boardService.getBoardList();
+	public String getBoardList(Model model, @RequestParam Map<String, String> paramMap) {
+		List<BoardVO> boardList = boardService.getBoardList(paramMap);
 		
 		model.addAttribute("boardList", boardList);
+		
+		if(paramMap.get("searchCondition") != null && !paramMap.get("searchCondition").equals(""))
+			model.addAttribute("searchCondition", paramMap.get("searchCondition"));
+		
+		if(paramMap.get("searchKeyword") != null && !paramMap.get("searchKeyword").equals(""))
+			model.addAttribute("searchKeyword", paramMap.get("searchKeyword"));
 		
 		return "board/getBoardList";
 	}
@@ -110,7 +117,15 @@ public class BoardController {
 	public String updateBoard(BoardVO boardVO) {
 		boardService.updateBoard(boardVO);
 		
-		return "redirect:/board/getBoardList.do?boardNo=" + boardVO.getBoardNo();
+		return "redirect:/board/getBoard.do?boardNo=" + boardVO.getBoardNo();
 	}
 	
+	// 게시글 삭제
+	@RequestMapping("/deleteBoard.do")
+	public String deleteBoard(@RequestParam("boardNo") int boardNo) {
+		boardService.deleteBoard(boardNo);
+		
+		return "redirect:/board/getBoardList.do";
+	}
+		
 }
